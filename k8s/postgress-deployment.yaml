@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgress-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: postgress
+  template:
+    metadata:
+      labels:
+        component: postgress
+    spec:
+      containers:
+      - name: postgress
+        image: postgres
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+          - mountPath: /var/lib/postgresql/data
+            subPath: postgres
+            name: postgress-storage
+        env: 
+         - name: POSTGRESS_PASSWORD
+           valueFrom: 
+            secretKeyRef:
+             name: pgpassword
+             key: PGPASSWORD
+      volumes:
+        - name: postgress-storage
+          persistentVolumeClaim:
+            claimName: database-persistent-volume-claim
+      
+          
